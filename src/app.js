@@ -4,21 +4,24 @@ const app = express(); // server create grne
 const connectDB = require("./config/database");
 
 const User = require("./models/user");
-app.use(express.json());
+app.use(express.json()); //middleware
 
 // creating apis
 app.post("/signup", async (req, res) => {
-  //creating the instance of user model
-  const user = new User(req.body);
-
-  console.log(req.body);
-
   //using try catch for error handling
   try {
+    //creating the instance of user model
+
+    const user = new User(req.body);
+
     await user.save();
-    res.send("User Created successfully");
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    res.status(400).send("Error creating the user: " + err.message);
+    console.error(error); // Log actual error for debugging
+
+    res
+      .status(400)
+      .json({ error: "Error creating the user: " + error.message });
   }
 });
 
@@ -80,17 +83,16 @@ app.delete("/user", async (req, res) => {
 
 //update  data of the user by id
 
-// app.patch("/user", async (req, res) => {
-//   const userId = req.body.userId;
-//   const data = req.body;
-//   try {
-//     await User.findByIdAndUpdate(userId, data);
-//     res.send("User updated successfully");
-//   } catch (error) {
-//     res.status(400).send("Spmething went wrong");
-//   }
-// });
-
+app.patch("/user", async (req, res) => {
+  const userId = req.body.userId;
+  const data = req.body;
+  try {
+    await User.findByIdAndUpdate(userId, data);
+    res.send("User updated successfully");
+  } catch (error) {
+    res.status(400).send("Spmething went wrong");
+  }
+});
 
 //update user data by email
 app.patch("/user", async (req, res) => {
@@ -98,7 +100,7 @@ app.patch("/user", async (req, res) => {
   const data = req.body;
 
   try {
-    await User.findOneAndUpdate({emailId:email}, data);
+    await User.findOneAndUpdate({ emailId: email }, data);
     res.send("user updated successfully by email");
   } catch (error) {
     res.status(400).send("Something went wrong");
